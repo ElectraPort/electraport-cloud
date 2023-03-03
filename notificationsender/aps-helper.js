@@ -1,6 +1,7 @@
 const { APNS, Notification, Errors } = require('apns2'),
     app = require('./../app'),
-    logger = require('./../logger');
+    logger = require('./../logger'),
+    fs = require('fs');
 let client = null;
 
 if (app.config.apn && app.config.apn.signingKey) {
@@ -9,7 +10,7 @@ if (app.config.apn && app.config.apn.signingKey) {
         signingKey: fs.readFileSync(`${app.config.apn.signingKey}`)
     });
     client.on(Errors.error, (err) => {
-        logger.error(`openHAB-cloud: APN error ${err.reason} ${err.statusCode} ${err.notification.deviceToken}`)
+        logger.error(`APN error ${err.reason} ${err.statusCode} ${err.notification.deviceToken}`)
     })
 }
 

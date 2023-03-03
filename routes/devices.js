@@ -5,14 +5,13 @@ var logger = require('../logger');
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 var ObjectId = mongoose.SchemaTypes.ObjectId;
-var UserDeviceLocationHistory = require('../models/userdevicelocationhistory');
 var appleSender = require('../notificationsender/aps-helper');
 var firebase = require('../notificationsender/firebase');
-var redis = require('../redis-helper');
 var form = require('express-form'),
     field = form.field,
     system = require('../system');
 
+    
 exports.devicesget = function(req, res) {
     UserDevice.find({owner: req.user.id}, function(error, userDevices) {
         if (!userDevices || error) {
@@ -34,14 +33,12 @@ exports.devicesget = function(req, res) {
                 selectedDeviceArrayId = i;
             }
         }
-        UserDeviceLocationHistory.find({userDevice: selectedDeviceId}, function(error, locationHistory) {
-//            logger.info("Location history size = " + locationHistory.length);
-            res.render('devices', { userDevices: userDevices,
-                title: "Devices", user: req.user, selectedDeviceId: selectedDeviceId,
-                selectedDeviceArrayId: selectedDeviceArrayId, locationHistory: locationHistory,
-                baseUrl: system.getBaseURL(), appleLink: system.getAppleLink(), androidLink: system.getAndroidLink(),
-                errormessages:req.flash('error'), infomessages:req.flash('info') });
-        });
+
+        res.render('devices', { userDevices: userDevices,
+            title: "Devices", user: req.user, selectedDeviceId: selectedDeviceId,
+            selectedDeviceArrayId: selectedDeviceArrayId,
+            baseUrl: system.getBaseURL(), appleLink: system.getAppleLink(), androidLink: system.getAndroidLink(),
+            errormessages:req.flash('error'), infomessages:req.flash('info') });
     });
 }
 
@@ -55,7 +52,7 @@ exports.devicessendmessage = function(req, res) {
             res.redirect('/devices/');
         });
     } else {
-        logger.info("openHAB-cloud: sending message to device " + req.params.id);
+        logger.info("sending message to device " + req.params.id);
         var sendMessageDeviceId = mongoose.Types.ObjectId(req.params.id);
         var message = req.form.messagetext;
         UserDevice.findOne({owner: req.user.id, _id: sendMessageDeviceId}, function (error, sendMessageDevice) {
@@ -77,7 +74,7 @@ exports.devicessendmessage = function(req, res) {
 }
 
 exports.devicesdelete = function(req, res) {
-    logger.info("openHAB-cloud: deleting device " + req.params.id);
+    logger.info("deleting device " + req.params.id);
     var deleteId = mongoose.Types.ObjectId(req.params.id);
     UserDevice.findOne({owner: req.user.id, _id: deleteId}, function(error, userDevice) {
         if (!error && userDevice) {
